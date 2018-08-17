@@ -36,7 +36,7 @@ def _distribute_metric(metric, experiment_name, project_path, fold):
 def _extract_feature_importances(CONFIG, fold, e, colnames):
     import pandas as pd
     import numpy as np
-    from os import path
+    from os import path, sep
     import matplotlib.pyplot as plt
 
     importances = e.feature_importances_
@@ -54,6 +54,10 @@ def _extract_feature_importances(CONFIG, fold, e, colnames):
            color="r", yerr=std[indices], align="center")
     plt.xticks(range(len(colnames)), feature_names, rotation=45)
     plt.xlim([-1, len(colnames)])
-    plt.savefig(path.join(CONFIG.experiment_path, fold, "feature_importance_plot_{0}.png".format(CONFIG.experiment_name)))
+    plt.savefig(path.join(CONFIG.experiment_path, fold, "feature_importance_plot_{experiment_name}_{fold}.png".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))))
 
-    pd.DataFrame.from_dict({"feature" : feature_names, "importance" : importances[indices]}).to_csv(path.join(CONFIG.experiment_path, fold, "feature_importances_{0}.csv".format(CONFIG.experiment_name)), index=False)
+    pd.DataFrame.from_dict({"feature" : feature_names, "importance" : importances[indices]}).to_csv(path.join(CONFIG.experiment_path, fold, 
+        "feature_importances_{experiment_name}_{fold}.png".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))), 
+        index=False)
+
+
