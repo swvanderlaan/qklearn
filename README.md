@@ -1,5 +1,4 @@
-# qklearn
-## CURRENTLY IN BETA!
+# qklearn (CURRENTLY IN BETA!)
 Tools for Parallelized Machine Learning using `sklearn` on a [qsub](http://pubs.opengroup.org/onlinepubs/009696799/utilities/qsub.html)-based High-Performance Cluster architecture
 
 ## Features
@@ -9,7 +8,9 @@ Tools for Parallelized Machine Learning using `sklearn` on a [qsub](http://pubs.
 
 ## Installation
 Use pip to install `qklearn` from this repository:
-```pip install git+git://github.com/tbezemer/qklearn```
+```bash
+pip install git+git://github.com/tbezemer/qklearn
+```
 
 ## Usage
 `qklearn` uses a configuration file to perform experiments. The file contains some basic parameters needed for the experiment.
@@ -45,8 +46,8 @@ p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor
 execute_experiment_kfold("path/to/my/config.txt", p)
 ```
 
-Training and Validation results are reported per fold, in each fold's folder  `ML_RESULTS_[EXPERIMENT_NAME].csv`, so as to be collected and combined later on:
-e.g.
+Training and Validation results are reported per fold, in each fold's folder, named `ML_RESULTS_[EXPERIMENT_NAME].csv`, so as to be collected and combined later on.
+An example CSV result file:
 ```csv
 fold,train_error,validation_error
 fold0,0.035114868377720494,0.0351148683777205
