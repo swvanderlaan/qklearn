@@ -22,6 +22,7 @@ experiment_name	My cool ML experiment
 KCV	30
 //Specify the numer of parallel jobs to execute using n_jobs. Ideally, this is the number of cores on the compute node
 n_jobs	12
+```
 
 You can run an experiment using a predefined config file following the rules described above (e.g. `config.txt`) as follows:
 
