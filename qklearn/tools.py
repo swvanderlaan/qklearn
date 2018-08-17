@@ -1,7 +1,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
-from funcs import _do_fold, _extract_feature_importances, _distribute_estimator
+from qklearn.funcs import _do_fold, _extract_feature_importances, _distribute_estimator
 
 class MLConfig:
 

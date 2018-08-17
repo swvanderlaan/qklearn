@@ -1,3 +1,1 @@
-import sys
-sys.path.append('../')
-import tools
+import qklearn.tools
