@@ -57,7 +57,7 @@ def _extract_feature_importances(CONFIG, fold, e, colnames):
     plt.savefig(path.join(CONFIG.experiment_path, fold, "feature_importance_plot_{experiment_name}_{fold}.png".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))))
 
     pd.DataFrame.from_dict({"feature" : feature_names, "importance" : importances[indices]}).to_csv(path.join(CONFIG.experiment_path, fold, 
-        "feature_importances_{experiment_name}_{fold}.png".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))), 
+        "feature_importances_{experiment_name}_{fold}.csv".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))), 
         index=False)
 
 

@@ -164,7 +164,7 @@ apply_estimator_to_fold(C, "{fold}")
 		with open(path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), "w") as js:
 			js.write(JOB_TEMPLATE)
 		
-		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=28G -l h_rt=01:00:00 -pe threaded {num_cores}".format(job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), job_name=CONFIG.experiment_name + "_" + fold, project_dir=path.join(CONFIG.experiment_path, fold), num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 ))
+		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), job_name=CONFIG.experiment_name + "_" + fold, project_dir=path.join(CONFIG.experiment_path, fold), num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 ))
 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py")))
 
 		i+=1
@@ -247,4 +247,5 @@ def apply_estimator_to_fold(CONFIG, fold):
 		"validation_error" : [validation_error]
 	}
 
-	pd.DataFrame.from_dict(d).to_csv(path.join(CONFIG.experiment_path, fold, "ML_RESULT_{0}.csv".format(CONFIG.experiment_name)), index=False)
+	pd.DataFrame.from_dict(d).to_csv(path.join(CONFIG.experiment_path, fold, "ML_RESULT_{experiment_name}_{fold}.csv".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))), index=False)
+
