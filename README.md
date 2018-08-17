@@ -37,3 +37,9 @@ p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor
 
 execute_experiment_kfold("path/to/my/config.txt", p)
 ```
+
+## Features
+`qklearn` currently features:
+- K-Fold cross-validation for classification (untested) and regression problems.
+- Feature importances, and feature importance plots when estimators support this. It will automatically attempt to extract these from a Pipeline object as well.
+- Training and Validation results are reported in a csv format per fold, so as to be collected and combined later on.
