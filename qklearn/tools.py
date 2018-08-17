@@ -173,7 +173,7 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 )
 		)
 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py")))
-		all_jobnames.append(CONFIG.experiment_name + "_" + fold, project_dir=path.join(CONFIG.experiment_path, fold))
+		all_jobnames.append(CONFIG.experiment_name + "_" + fold)
 		i+=1
 
 	hold_jid = ",".join(all_jobnames)
