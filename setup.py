@@ -7,7 +7,7 @@ setup(
     license='MIT',
     description='A package allowing for parallelization of sklearn-based Machine Learning on qsub based HPC architectures.',
     long_description=open('README.txt').read(),
-    install_requires=['numpy', 'pandas', 'joblib'],
+    install_requires=['matplotlib', 'numpy', 'pandas', 'joblib'],
     url='https://github.com/tbezemer/qklearn.git',
     author='Tim Bezemer',
     author_email='tim@timbezemer.com'
