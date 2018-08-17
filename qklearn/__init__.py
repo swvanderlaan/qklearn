@@ -1,1 +1,1 @@
-import qklearn.tools
+from qklearn.tools import *
