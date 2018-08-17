@@ -1,3 +1,64 @@
+def _collect_results(CONFIG):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    from glob import glob
+    from os import path
+
+    results = pd.concat([pd.read_csv(f) for f in glob(path.join(CONFIG.experiment_path, "fold*/ML_RESULT*.csv"))])
+
+    results.to_csv(path.join(CONFIG.experiment_path, "RESULTS.csv"), index=False)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    ax.boxplot([results['train_error'], results['validation_error']])
+    plt.xticks([1,2], ['train', 'validation'])
+    plt.xlabel("Error")
+    plt.ylabel("MSE")
+    plt.title("Mean Feature Importances for {experiment} over all folds (k={folds})".format(experiment=CONFIG.experiment_name, folds=CONFIG.KCV))
+    plt.savefig(path.join(CONFIG.experiment_path, "SummarizedErrorPlot.png"))
+
+def _collect_importances(CONFIG):
+    import pandas as pd
+    from glob import glob
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from os import path
+
+    def process_importance(d):
+            d = pd.read_csv(d)
+            d.index = d['feature']
+            d = d.drop(columns="feature")
+            return d.transpose()
+
+    dfs = [process_importance(f) for f in glob(path.join(CONFIG.experiment_path, "fold*/feature_importances_*_fold*.csv"))]
+
+    all_importances = pd.concat(dfs, sort=True)
+
+    all_importances.to_csv(path.join(CONFIG.experiment_path, "IMPORTANCES.csv"), index=False)
+
+    bar_data = {"feature" : [], "mean" : [], "std" : []}
+
+    for col in all_importances.columns.values:
+            bar_data['feature'].append(col)
+            bar_data['mean'].append(all_importances[col].mean())
+            bar_data['std'].append(all_importances[col].std())
+    bar_data = pd.DataFrame.from_dict(bar_data)
+    bar_data = bar_data.sort_values("mean", ascending=False)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.bar(x=range(0,len(bar_data)),
+            height=bar_data['mean'],
+            yerr=bar_data['std']
+            )
+    plt.xticks(range(0,len(bar_data)), bar_data['feature'], rotation='vertical')
+    plt.title("Summarized Feature Importance for {experiment} over all folds (k={folds})".format(experiment=CONFIG.experiment_name, folds=CONFIG.KCV))
+    plt.tight_layout()
+    plt.savefig(path.join(CONFIG.experiment_path, "SummarizedFeatureImportancePlot.png"))
+
 def _initialize_experiment(CONFIG):
     from os import path, system
     from shutil import copyfile

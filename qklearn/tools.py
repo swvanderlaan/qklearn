@@ -1,7 +1,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
-from qklearn.funcs import _initialize_experiment, _do_fold, _distribute_estimator, _distribute_metric, _extract_feature_importances
+from qklearn.funcs import _initialize_experiment, _do_fold, _distribute_estimator, _distribute_metric, _extract_feature_importances, _collect_results, _collect_importances
 
 
 class MLConfig:
@@ -151,23 +151,54 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 	print("- Executing experiment")
 	i=0
 	print("\t* Setting up and Submitting jobs:")
+
+	all_jobnames = []
+
 	for fold in ["fold{0}".format(f) for f in range(0, CONFIG.KCV)]:
 
 		print("\t\t* {fold}".format(fold=fold))
 
 		JOB_TEMPLATE = """#!{shebang}
-from qklearn import apply_estimator_to_fold, MLConfig
-C = MLConfig = "{config_path}"
-apply_estimator_to_fold(C, "{fold}")
+from qklearn import apply_estimator_to_fold
+apply_estimator_to_fold("{config_path}", "{fold}")
 		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.experiment_path, "CONFIG"))
 
 		with open(path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), "w") as js:
 			js.write(JOB_TEMPLATE)
 		
-		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), job_name=CONFIG.experiment_name + "_" + fold, project_dir=path.join(CONFIG.experiment_path, fold), num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 ))
+		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(
+			job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), 
+			job_name=CONFIG.experiment_name + "_" + fold, 
+			project_dir=path.join(CONFIG.experiment_path, fold), 
+			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 )
+		)
 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py")))
-
+		all_jobnames.append(CONFIG.experiment_name + "_" + fold, project_dir=path.join(CONFIG.experiment_path, fold))
 		i+=1
+
+	hold_jid = ",".join(all_jobnames)
+
+	COLLECT_TEMPLATE = """#!{shebang}
+from qklearn import collect_results
+collect_results("{config_path}")
+""".format(shebang=executable, config_path=path.join(CONFIG.experiment_path, "CONFIG"))
+
+	with open(path.join(CONFIG.experiment_path, "COLLECT_SCRIPT.py"), "w") as js:
+			js.write(COLLECT_TEMPLATE)
+
+	system("echo \"python {collect_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -hold_jid={hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
+		hold_jid=hold_jid, 
+		collect_script_path=path.join(CONFIG.experiment_path, "COLLECT_SCRIPT.py"), 
+		job_name=CONFIG.experiment_name + "_COLLECTOR", 
+		project_dir=CONFIG.experiment_path)
+	)
+
+def collect_results(CONFIG):
+
+	if isinstance(CONFIG, str): CONFIG = MLConfig(CONFIG);
+
+	_collect_importances(CONFIG)
+	_collect_results(CONFIG)
 
 def apply_estimator_to_fold(CONFIG, fold):
 
