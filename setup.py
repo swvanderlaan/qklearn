@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='qklearn',
     version='0.1',
-    packages=find_packages(),
+    packages=[''],
     license='MIT',
     description='A package allowing for parallelization of sklearn-based Machine Learning on qsub based HPC architectures.',
     long_description=open('README.txt').read(),
