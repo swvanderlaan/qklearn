@@ -112,7 +112,7 @@ def create_kfold_cv(CONFIG):
 	OUTPUT = df[CONFIG.target_variable]
 	print("\t* Creating folds")
 
-	_ = Parallel(n_jobs=-1)( delayed(_do_fold)(train, test, i, CONFIG.KCV, INPUT, OUTPUT, CONFIG.experiment_path) for (train, test), i in zip(KFold(CONFIG.KCV).split(INPUT), range(0, CONFIG.KCV)) )
+	_ = Parallel(n_jobs=-1,max_nbytes=None)( delayed(_do_fold)(train, test, i, CONFIG.KCV, INPUT, OUTPUT, CONFIG.experiment_path) for (train, test), i in zip(KFold(CONFIG.KCV).split(INPUT), range(0, CONFIG.KCV)) )
 
 def execute_experiment_kfold(CONFIG, estimator, metric=False):
 
@@ -141,12 +141,12 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 
 	print("- Distributing classifier object to each fold")
 
-	_ = Parallel(n_jobs=-1)(delayed(_distribute_estimator)(estimator, CONFIG.experiment_name, CONFIG.experiment_path, fold) for fold in folds)
+	_ = Parallel(n_jobs=-1,max_nbytes=None)(delayed(_distribute_estimator)(estimator, CONFIG.experiment_name, CONFIG.experiment_path, fold) for fold in folds)
 
 	if metric != False:
 
 		print("- Distributing custom metric object to each fold")
-		_ = Parallel(n_jobs=-1)(delayed(_distribute_metric)(metric, CONFIG.experiment_name, CONFIG.experiment_path, fold) for fold in folds)
+		_ = Parallel(n_jobs=-1,max_nbytes=None)(delayed(_distribute_metric)(metric, CONFIG.experiment_name, CONFIG.experiment_path, fold) for fold in folds)
 
 	print("- Executing experiment")
 	i=0
