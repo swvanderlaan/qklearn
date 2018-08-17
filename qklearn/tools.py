@@ -247,6 +247,4 @@ def apply_estimator_to_fold(CONFIG, fold):
 		"validation_error" : [validation_error]
 	}
 
-	print(path.join(CONFIG.experiment_path, fold, "ML_RESULT_{0}.csv".format(CONFIG.experiment_name)))
-	
 	pd.DataFrame.from_dict(d).to_csv(path.join(CONFIG.experiment_path, fold, "ML_RESULT_{0}.csv".format(CONFIG.experiment_name)), index=False)
