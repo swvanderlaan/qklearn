@@ -42,4 +42,9 @@ execute_experiment_kfold("path/to/my/config.txt", p)
 `qklearn` currently features:
 - K-Fold cross-validation for classification (untested) and regression problems.
 - Feature importances, and feature importance plots when estimators support this. It will automatically attempt to extract these from a Pipeline object as well.
-- Training and Validation results are reported in a csv format per fold, so as to be collected and combined later on.
+- Training and Validation results are reported in a csv format per fold, so as to be collected and combined later on:
+e.g.
+```csv
+fold,train_error,validation_error
+fold0,0.035114868377720494,0.0351148683777205
+```
