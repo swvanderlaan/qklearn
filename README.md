@@ -22,3 +22,17 @@ experiment_name	My cool ML experiment
 KCV	30
 //Specify the numer of parallel jobs to execute using n_jobs. Ideally, this is the number of cores on the compute node
 n_jobs	12
+
+You can run an experiment using a predefined config file following the rules described above (e.g. `config.txt`) as follows:
+
+```
+from qklearn import execute_experiment_kfold
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.pipeline import Pipeline
+
+p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor(n_estimators=30))])
+
+execute_experiment_kfold("path/to/my/config.txt", p)
+```
