@@ -40,7 +40,6 @@ p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor
 execute_experiment_kfold("path/to/my/config.txt", p)
 ```
 
-*N.B.*
 ## Features
 `qklearn` currently features:
 - K-Fold cross-validation for classification (untested) and regression problems.
