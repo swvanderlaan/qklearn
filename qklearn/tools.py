@@ -186,7 +186,7 @@ collect_results("{config_path}")
 	with open(path.join(CONFIG.experiment_path, "COLLECT_SCRIPT.py"), "w") as js:
 			js.write(COLLECT_TEMPLATE)
 
-	system("echo \"python {collect_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -hold_jid={hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
+	system("echo \"python {collect_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
 		hold_jid=hold_jid, 
 		collect_script_path=path.join(CONFIG.experiment_path, "COLLECT_SCRIPT.py"), 
 		job_name=CONFIG.experiment_name + "_COLLECTOR", 
