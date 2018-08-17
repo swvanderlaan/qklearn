@@ -174,7 +174,7 @@ def apply_estimator_to_fold(CONFIG, fold):
 	if isinstance(CONFIG, str): CONFIG = MLConfig(CONFIG);
 
 	import pandas as pd
-	from os import path
+	from os import path, sep
 	from sklearn.pipeline import Pipeline
 	from sklearn.metrics import mean_squared_error, accuracy_score
 	from glob import glob
