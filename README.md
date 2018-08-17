@@ -15,13 +15,15 @@ Spaces or tabs after the first space (separating the two main fields) will not b
 #Comment lines may start with '#' or '//'. Comments cannot occur 'in-line'
 //The project path is a required parameter. Always use ABSOLUTE paths to prevent errors.
 project_path	/home/myproject
-//The data_file parameter is also an ABSOLUTE path
+//The data_file parameter is also an ABSOLUTE path. The datafile should be a pickled Pandas DataFrame.
+data_file	/home/some_data_file.pkl
 //The experiment name will be converted to upper-case and non-filesystem safe characters are converted to underscores (below will become MY_COOL_ML_EXPERIMENT)
 experiment_name	My cool ML experiment
 //Specify the number of cross-validation folds using KCV:
 KCV	30
 //Specify the numer of parallel jobs to execute using n_jobs. Ideally, this is the number of cores on the compute node
 n_jobs	12
+//Specify the target variable in the data file. This is used
 ```
 
 You can run an experiment using a predefined config file following the rules described above (e.g. `config.txt`) as follows:
@@ -38,6 +40,7 @@ p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor
 execute_experiment_kfold("path/to/my/config.txt", p)
 ```
 
+*N.B.*
 ## Features
 `qklearn` currently features:
 - K-Fold cross-validation for classification (untested) and regression problems.
