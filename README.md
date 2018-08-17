@@ -26,7 +26,7 @@ n_jobs	12
 
 You can run an experiment using a predefined config file following the rules described above (e.g. `config.txt`) as follows:
 
-```
+```python
 from qklearn import execute_experiment_kfold
 
 from sklearn.preprocessing import StandardScaler
