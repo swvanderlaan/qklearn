@@ -1,3 +1,3 @@
 import sys
-sys.path.append('./qklearn/')
+sys.path.append('../')
 import tools
