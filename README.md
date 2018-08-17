@@ -26,7 +26,7 @@ n_jobs	12
 //Specify the target variable in the data file. This is used
 ```
 
-You can run an experiment using a predefined config file following the rules described above (e.g. `config.txt`) as follows:
+You can run an experiment using a predefined config file (e.g. `config.txt`) following the rules described above as follows:
 
 ```python
 from qklearn import execute_experiment_kfold
