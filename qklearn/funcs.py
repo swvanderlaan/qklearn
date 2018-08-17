@@ -11,11 +11,11 @@ def _do_fold(train, test, i, K, X, Y):
     train_input, train_output = X.iloc[train], Y.iloc[train]
     test_input, test_output = X.iloc[test], Y.iloc[test]
 
-    train_input.to_pickle(path.join("fold{0}".format(i), "train_input.pkl"))
-    train_output.to_pickle(path.join("fold{0}".format(i), "train_output.pkl"))
+    train_input.to_pickle(path.join("fold{0}".format(i), "TRAIN_INPUT.pkl"))
+    train_output.to_pickle(path.join("fold{0}".format(i), "TRAIN_OUTPUT.pkl"))
 
-    train_input.to_pickle(path.join("fold{0}".format(i), "test_input.pkl"))
-    train_output.to_pickle(path.join("fold{0}".format(i), "test_output.pkl"))
+    train_input.to_pickle(path.join("fold{0}".format(i), "VALIDATION_INPUT.pkl"))
+    train_output.to_pickle(path.join("fold{0}".format(i), "VALIDATION_OUTPUT.pkl"))
 
 def _distribute_estimator(estimator, experiment_name, project_path, fold):
     from joblib import dump

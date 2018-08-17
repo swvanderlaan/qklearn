@@ -112,7 +112,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 	from glob import glob
 	import pandas as pd
 	from joblib import Parallel, delayed
-	from os import path
+	from os import path, system
 	from sys import executable
 
 	folds = [fold for fold in glob(path.join(CONFIG.project_path, "fold*/")) if path.isdir(path.join(CONFIG.project_path, fold))]
@@ -138,23 +138,30 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 
 	print("- Executing experiment")
 	i=0
+	print("\t* Setting up and Submitting jobs:")
 	for fold in ["fold{0}".format(f) for f in range(0, CONFIG.KCV)]:
 
-		print("\t* Setting up job for fold {0}/{1}".format(i, CONFIG.KCV))
-		# # Here, job submission should take place:
-		script = """#!{0}
-import hpcmltools as hml
-C = hml.MLConfig = "{1}"
-hml.apply_estimator_to_fold(C, "{2}")
-		""".format(executable,CONFIG.config_path, fold)
+		print("\t\t* {fold}".format(fold=fold))
+
+		JOB_TEMPLATE = """#!{shebang}
+from qklearn import apply_estimator_to_fold, MLConfig
+C = MLConfig = "{config_path}"
+apply_estimator_to_fold(C, "{fold}")
+		""".format(shebang=executable,config_path=CONFIG.config_path, fold=fold)
 
 		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), "w") as js:
-			js.write(script)
+			js.write(JOB_TEMPLATE)
 		
+		#system("\"module load anaconda; python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=28G -l h_rt=01:00:00 -pe threaded {num_cores}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), job_name=CONFIG.experiment_name + "_" + fold, project_dir=path.join(CONFIG.project_path, fold), num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 ))
+		system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py")))
+
+		break;
 		# apply_estimator_to_fold(CONFIG, fold, estimator, params, metric)
 		i+=1
 
 def apply_estimator_to_fold(CONFIG, fold):
+
+	if isinstance(CONFIG, str): CONFIG = MLConfig(CONFIG);
 
 	import pandas as pd
 	from os import path
@@ -163,12 +170,12 @@ def apply_estimator_to_fold(CONFIG, fold):
 	from glob import glob
 	from joblib import load
 
-	TRAIN_INPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "train_input.pkl"))
-	TRAIN_OUTPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "train_output.pkl"))
+	TRAIN_INPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "TRAIN_INPUT.pkl"))
+	TRAIN_OUTPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "TRAIN_OUTPUT.pkl"))
 
-	ESTIMATOR = load(path.join(CONFIG.project_path, fold, "ESTIMATOR_{0}.pkl"))
+	ESTIMATOR = load(path.join(CONFIG.project_path, fold, "ESTIMATOR_{experiment_name}.pkl".format(experiment_name=CONFIG.experiment_name)))
 
-	if not path.isfile(path.join(CONFIG.project_path, fold, "METRIC_{0}.pkl".format(CONFIG.experiment_name))):
+	if not path.isfile(path.join(CONFIG.project_path, fold, "METRIC_{experiment_name}.pkl".format(experiment_name=CONFIG.experiment_name))):
 
 		if TRAIN_OUTPUT.dtype.name.startswith("float") or TRAIN_OUTPUT.dtype.name.startswith("int"):
 			metric = mean_squared_error
@@ -202,11 +209,11 @@ def apply_estimator_to_fold(CONFIG, fold):
 	train_error = metric(TRAIN_OUTPUT, ESTIMATOR.predict(TRAIN_INPUT))
 
 	#Load the test set data
-	TEST_INPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "test_input.pkl"))
-	TEST_OUTPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "train_output.pkl"))
+	VALIDATION_INPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "VALIDATION_INPUT.pkl"))
+	VALIDATION_OUTPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "VALIDATION_OUTPUT.pkl"))
 
 	#And make the predictions:
-	test_error = metric(TEST_OUTPUT, ESTIMATOR.predict(TEST_INPUT))
+	validation_error = metric(VALIDATION_OUTPUT, ESTIMATOR.predict(VALIDATION_INPUT))
 
 	#Extract feature importances if they are present, and account for the possibility of a Pipeline object (which will have a "steps" attribute)
 	if isinstance(ESTIMATOR, Pipeline) and hasattr(ESTIMATOR, "steps"):
@@ -215,19 +222,19 @@ def apply_estimator_to_fold(CONFIG, fold):
 
 			if hasattr(step, 'feature_importances_'):
 
-				_extract_feature_importances(CONFIG,fold,step, TEST_INPUT.columns.values)
+				_extract_feature_importances(CONFIG,fold,step, VALIDATION_INPUT.columns.values)
 				break
 	else:
 
 		if hasattr(step, 'feature_importances_'):
 
-			_extract_feature_importances(CONFIG,fold,ESTIMATOR, TEST_INPUT.columns.values)
+			_extract_feature_importances(CONFIG,fold,ESTIMATOR, VALIDATION_INPUT.columns.values)
 
 
 	#Save the results for this experiment in table format for easy processing later
 	d = {"fold" : [fold], 
 		"train_error" : [train_error],
-		"test_error" : [test_error]
+		"validation_error" : [validation_error]
 	}
 
 	print(path.join(CONFIG.project_path, fold, "ML_RESULT_{0}.csv".format(CONFIG.experiment_name)))
