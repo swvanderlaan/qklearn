@@ -2,6 +2,11 @@
 ## CURRENTLY IN BETA!
 Tools for Parallelized Machine Learning using `sklearn` on a [qsub](http://pubs.opengroup.org/onlinepubs/009696799/utilities/qsub.html)-based High-Performance Cluster architecture
 
+## Features
+`qklearn` currently features:
+- K-Fold cross-validation for classification (untested) and regression (tested) problems.
+- Feature importances, and feature importance plots when estimators support this.
+
 ## Installation
 Use pip to install `qklearn` from this repository:
 ```pip install git+git://github.com/tbezemer/qklearn```
@@ -40,13 +45,11 @@ p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor
 execute_experiment_kfold("path/to/my/config.txt", p)
 ```
 
-## Features
-`qklearn` currently features:
-- K-Fold cross-validation for classification (untested) and regression problems.
-- Feature importances, and feature importance plots when estimators support this. It will automatically attempt to extract these from a Pipeline object as well.
-- Training and Validation results are reported in a csv format per fold, so as to be collected and combined later on:
+Training and Validation results are reported per fold, in each fold's folder  `ML_RESULTS_[EXPERIMENT_NAME].csv`, so as to be collected and combined later on:
 e.g.
 ```csv
 fold,train_error,validation_error
 fold0,0.035114868377720494,0.0351148683777205
 ```
+
+Where possible, `qklearn` will extract and plot feature importances from the estimator. It will also attempt to automatically extract these from a `Pipeline` object.
