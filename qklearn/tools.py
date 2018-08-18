@@ -96,7 +96,7 @@ KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 			return s
 
 		if len(args)== 1:
-			with open(config_path, "r") as config_file:
+			with open(args[0], "r") as config_file:
 
 				config_file_contents = _newline_cleanup(config_file.read())
 
