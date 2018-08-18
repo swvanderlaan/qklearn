@@ -103,8 +103,8 @@ KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 						
 
 					fields[0] = fields[0].lower()
-					if fields[0] not in ["project_path"]:
-						self._config_dict[fields[0]] = fields[1]
+					
+					self._config_dict[fields[0]] = fields[1]
 
 
 			if self.data_file == None:
@@ -115,8 +115,7 @@ KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 				raise ValueError("Incorrect configuration! experiment_name must be set!")
 
 			self._config_dict['config_path'] = args[0]
-			self._config_dict['project_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
-
+			
 		elif "data_file" in kwargs and "project_path" in kwargs and "experiment_name" in kwargs:
 
 			for param, value in kwargs.items():
