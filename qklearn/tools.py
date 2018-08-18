@@ -25,14 +25,6 @@ class MLConfig:
 		self._config_dict['project_path'] = project_path
 
 	@property
-	def project_path(self):
-		return self._config_dict['project_path']
-
-	@project_path.setter
-	def project_path(self, project_path):
-		self._config_dict['project_path'] = project_path
-
-	@property
 	def data_file(self):
 		return self._config_dict['data_file']
 
