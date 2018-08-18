@@ -12,25 +12,49 @@ class MLConfig:
 	def KCV(self):
 		return int(self._config_dict['kcv']) if "kcv" in self._config_dict else None
 
+	@KCV.setter
+	def KCV(self, kcv):
+		self._config_dict['kcv'] = kcv
+
 	@property
 	def project_path(self):
 		return self._config_dict['project_path']
+
+	@project_path.setter
+	def project_path(self, project_path):
+		self._config_dict['project_path'] = project_path
 
 	@property
 	def experiment_path(self):
 		return self._config_dict['experiment_path']
 
+	@experiment_path.setter
+	def experiment_path(self, experiment_path):
+		self._config_dict['experiment_path'] = experiment_path
+
 	@property
 	def data_file(self):
 		return self._config_dict['data_file']
+
+	@data_file.setter
+	def data_file(self, data_file):
+		self._config_dict['data_file'] = data_file
 
 	@property
 	def config_path(self):
 		return self._config_dict['config_path']
 
+	@config_path.setter
+	def config_path(self, config_path):
+		self._config_dict['config_path'] = config_path
+
 	@property
 	def target_variable(self):
 		return self._config_dict['target_variable'] if 'target_variable' in self._config_dict else False
+
+	@target_variable.setter
+	def target_variable(self, target_variable):
+		self._config_dict['target_variable'] = target_variable
 
 	@property
 	def experiment_name(self):
@@ -38,9 +62,17 @@ class MLConfig:
 
 		return self._config_dict['experiment_name'].upper().translate(remove_punctuation_map)
 
+	@experiment_name.setter
+	def experiment_name(self, experiment_name):
+		self._config_dict['experiment_name'] = experiment_name
+
 	@property
 	def n_jobs(self):
 		return self._config_dict['n_jobs'] if 'n_jobs' in self._config_dict else 1
+
+	@n_jobs.setter
+	def n_jobs(self, n_jobs):
+		self._config_dict['n_jobs'] = n_jobs
 
 	def __str__(self):
 
