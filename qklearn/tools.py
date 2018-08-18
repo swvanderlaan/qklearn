@@ -199,20 +199,20 @@ from qklearn import apply_estimator_to_fold
 apply_estimator_to_fold("{config_path}", "{fold}")
 		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)))
 
-		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), "w") as js:
+		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
 			js.write(JOB_TEMPLATE)
 		
 		job_name=CONFIG.experiment_name + "_" + fold
 
 		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(
-			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), 
+			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 			job_name=job_name, 
 			project_dir=path.join(CONFIG.project_path, fold),
 			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
 			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 )
 		)
-		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py")))
+		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py")))
 		all_jobnames.append(job_name)
 		i+=1
 
