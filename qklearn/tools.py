@@ -25,12 +25,12 @@ class MLConfig:
 		self._config_dict['project_path'] = project_path
 
 	@property
-	def experiment_path(self):
-		return self._config_dict['experiment_path']
+	def project_path(self):
+		return self._config_dict['project_path']
 
-	@experiment_path.setter
-	def experiment_path(self, experiment_path):
-		self._config_dict['experiment_path'] = experiment_path
+	@project_path.setter
+	def project_path(self, project_path):
+		self._config_dict['project_path'] = project_path
 
 	@property
 	def data_file(self):
@@ -111,7 +111,7 @@ KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 						
 
 					fields[0] = fields[0].lower()
-					if fields[0] not in ["experiment_path"]:
+					if fields[0] not in ["project_path"]:
 						self._config_dict[fields[0]] = fields[1]
 
 
@@ -123,7 +123,7 @@ KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 				raise ValueError("Incorrect configuration! experiment_name must be set!")
 
 			self._config_dict['config_path'] = args[0]
-			self._config_dict['experiment_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
+			self._config_dict['project_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
 
 		elif "data_file" in kwargs and "project_path" in kwargs and "experiment_name" in kwargs:
 
@@ -131,7 +131,7 @@ KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 
 				self._config_dict[param] = value
 
-			self._config_dict['experiment_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
+			self._config_dict['project_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
 			self._config_dict['config_path'] = False
 		else:
 
@@ -157,7 +157,7 @@ def create_kfold_cv(CONFIG):
 	OUTPUT = df[CONFIG.target_variable]
 	print("\t* Creating folds")
 
-	_ = Parallel(n_jobs=-1,max_nbytes=None)( delayed(_do_fold)(train, test, i, CONFIG.KCV, INPUT, OUTPUT, CONFIG.experiment_path) for (train, test), i in zip(KFold(CONFIG.KCV).split(INPUT), range(0, CONFIG.KCV)) )
+	_ = Parallel(n_jobs=-1,max_nbytes=None)( delayed(_do_fold)(train, test, i, CONFIG.KCV, INPUT, OUTPUT, CONFIG.project_path) for (train, test), i in zip(KFold(CONFIG.KCV).split(INPUT), range(0, CONFIG.KCV)) )
 
 def execute_experiment_kfold(CONFIG, estimator, metric=False):
 
@@ -172,7 +172,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 	from os import path, system
 	from sys import executable
 
-	folds = [fold for fold in glob(path.join(CONFIG.experiment_path, "fold*/")) if path.isdir(path.join(CONFIG.experiment_path, fold))]
+	folds = [fold for fold in glob(path.join(CONFIG.project_path, "fold*/")) if path.isdir(path.join(CONFIG.project_path, fold))]
 
 	if not folds or len(folds) != CONFIG.KCV:
 		
@@ -182,16 +182,16 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 	else:
 		print("- {0}-fold Cross-validation scheme was previously prepared. Continuing.".format(CONFIG.KCV))
 
-	folds = [fold for fold in glob(path.join(CONFIG.experiment_path, "fold*/")) if path.isdir(path.join(CONFIG.experiment_path, fold))]
+	folds = [fold for fold in glob(path.join(CONFIG.project_path, "fold*/")) if path.isdir(path.join(CONFIG.project_path, fold))]
 
 	print("- Distributing classifier object to each fold")
 
-	_ = Parallel(n_jobs=-1,max_nbytes=None)(delayed(_distribute_estimator)(estimator, CONFIG.experiment_name, CONFIG.experiment_path, fold) for fold in folds)
+	_ = Parallel(n_jobs=-1,max_nbytes=None)(delayed(_distribute_estimator)(estimator, CONFIG.experiment_name, CONFIG.project_path, fold) for fold in folds)
 
 	if metric != False:
 
 		print("- Distributing custom metric object to each fold")
-		_ = Parallel(n_jobs=-1,max_nbytes=None)(delayed(_distribute_metric)(metric, CONFIG.experiment_name, CONFIG.experiment_path, fold) for fold in folds)
+		_ = Parallel(n_jobs=-1,max_nbytes=None)(delayed(_distribute_metric)(metric, CONFIG.experiment_name, CONFIG.project_path, fold) for fold in folds)
 
 	print("- Executing experiment")
 	i=0
@@ -206,18 +206,18 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 		JOB_TEMPLATE = """#!{shebang}
 from qklearn import apply_estimator_to_fold
 apply_estimator_to_fold("{config_path}", "{fold}")
-		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.experiment_path, "CONFIG"))
+		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.project_path, "CONFIG"))
 
-		with open(path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), "w") as js:
+		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), "w") as js:
 			js.write(JOB_TEMPLATE)
 		
 		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(
-			job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py"), 
+			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), 
 			job_name=CONFIG.experiment_name + "_" + fold, 
-			project_dir=path.join(CONFIG.experiment_path, fold), 
+			project_dir=path.join(CONFIG.project_path, fold), 
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 )
 		)
-		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.experiment_path, fold, "JOB_SCRIPT.py")))
+		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py")))
 		all_jobnames.append(CONFIG.experiment_name + "_" + fold)
 		i+=1
 
@@ -226,16 +226,16 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 	COLLECT_TEMPLATE = """#!{shebang}
 from qklearn import collect_results
 collect_results("{config_path}")
-""".format(shebang=executable, config_path=path.join(CONFIG.experiment_path, "CONFIG"))
+""".format(shebang=executable, config_path=path.join(CONFIG.project_path, "CONFIG"))
 
-	with open(path.join(CONFIG.experiment_path, "COLLECT_SCRIPT.py"), "w") as js:
+	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT.py"), "w") as js:
 			js.write(COLLECT_TEMPLATE)
 
 	system("echo \"python {collect_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
 		hold_jid=hold_jid, 
-		collect_script_path=path.join(CONFIG.experiment_path, "COLLECT_SCRIPT.py"), 
+		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT.py"), 
 		job_name=CONFIG.experiment_name + "_COLLECTOR", 
-		project_dir=CONFIG.experiment_path)
+		project_dir=CONFIG.project_path)
 	)
 
 def collect_results(CONFIG):
@@ -256,12 +256,12 @@ def apply_estimator_to_fold(CONFIG, fold):
 	from glob import glob
 	from joblib import load
 
-	TRAIN_INPUT = pd.read_pickle(path.join(CONFIG.experiment_path, fold, "TRAIN_INPUT.pkl"))
-	TRAIN_OUTPUT = pd.read_pickle(path.join(CONFIG.experiment_path, fold, "TRAIN_OUTPUT.pkl"))
+	TRAIN_INPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "TRAIN_INPUT.pkl"))
+	TRAIN_OUTPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "TRAIN_OUTPUT.pkl"))
 
-	ESTIMATOR = load(path.join(CONFIG.experiment_path, fold, "ESTIMATOR_{experiment_name}.pkl".format(experiment_name=CONFIG.experiment_name)))
+	ESTIMATOR = load(path.join(CONFIG.project_path, fold, "ESTIMATOR_{experiment_name}.pkl".format(experiment_name=CONFIG.experiment_name)))
 
-	if not path.isfile(path.join(CONFIG.experiment_path, fold, "METRIC_{experiment_name}.pkl".format(experiment_name=CONFIG.experiment_name))):
+	if not path.isfile(path.join(CONFIG.project_path, fold, "METRIC_{experiment_name}.pkl".format(experiment_name=CONFIG.experiment_name))):
 
 		if TRAIN_OUTPUT.dtype.name.startswith("float") or TRAIN_OUTPUT.dtype.name.startswith("int"):
 			metric = mean_squared_error
@@ -271,7 +271,7 @@ def apply_estimator_to_fold(CONFIG, fold):
 			raise ValueError("Unsupported dtype for output variable")
 	else:
 
-		metric = load(path.join(CONFIG.experiment_path, fold, "METRIC_{0}.pkl".format(CONFIG.experiment_name)))
+		metric = load(path.join(CONFIG.project_path, fold, "METRIC_{0}.pkl".format(CONFIG.experiment_name)))
 
 	# Configure the estimator, or each of the steps in the Pipeline to utilize all cores, when the algorithm allows for it:
 	if isinstance(ESTIMATOR, Pipeline) and hasattr(ESTIMATOR, "steps"):
@@ -295,8 +295,8 @@ def apply_estimator_to_fold(CONFIG, fold):
 	train_error = metric(TRAIN_OUTPUT, ESTIMATOR.predict(TRAIN_INPUT))
 
 	#Load the test set data
-	VALIDATION_INPUT = pd.read_pickle(path.join(CONFIG.experiment_path, fold, "VALIDATION_INPUT.pkl"))
-	VALIDATION_OUTPUT = pd.read_pickle(path.join(CONFIG.experiment_path, fold, "VALIDATION_OUTPUT.pkl"))
+	VALIDATION_INPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "VALIDATION_INPUT.pkl"))
+	VALIDATION_OUTPUT = pd.read_pickle(path.join(CONFIG.project_path, fold, "VALIDATION_OUTPUT.pkl"))
 
 	#And make the predictions:
 	validation_error = metric(VALIDATION_OUTPUT, ESTIMATOR.predict(VALIDATION_INPUT))
@@ -323,5 +323,5 @@ def apply_estimator_to_fold(CONFIG, fold):
 		"validation_error" : [validation_error]
 	}
 
-	pd.DataFrame.from_dict(d).to_csv(path.join(CONFIG.experiment_path, fold, "ML_RESULT_{experiment_name}_{fold}.csv".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))), index=False)
+	pd.DataFrame.from_dict(d).to_csv(path.join(CONFIG.project_path, fold, "ML_RESULT_{experiment_name}_{fold}.csv".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))), index=False)
 
