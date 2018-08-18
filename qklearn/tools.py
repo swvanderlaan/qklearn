@@ -95,7 +95,7 @@ class MLConfig:
 
 		elif "data_file" in kwargs and "project_path" in kwargs and "experiment_name" in kwargs:
 
-			for param, value in kwargs:
+			for param, value in kwargs.items():
 
 				self._config_dict[param] = value
 
