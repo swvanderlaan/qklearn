@@ -197,7 +197,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 		JOB_TEMPLATE = """#!{shebang}
 from qklearn import apply_estimator_to_fold
 apply_estimator_to_fold("{config_path}", "{fold}")
-		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.project_path, "CONFIG"))
+		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name)))
 
 		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), "w") as js:
 			js.write(JOB_TEMPLATE)

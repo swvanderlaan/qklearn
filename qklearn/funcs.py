@@ -65,8 +65,8 @@ def _initialize_experiment(CONFIG):
 
     if not path.isdir(CONFIG.project_path): system("mkdir {project_path}".format(project_path=CONFIG.project_path));
     
-    experiment_config_path = path.join(CONFIG.project_path, "CONFIG")
-    
+    experiment_config_path = path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name))
+
     if not CONFIG.config_path:
 
         with open(experiment_config_path, "w") as f:
