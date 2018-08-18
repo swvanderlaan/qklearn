@@ -202,14 +202,16 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), "w") as js:
 			js.write(JOB_TEMPLATE)
 		
+		job_name=CONFIG.experiment_name + "_" + fold
+
 		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(
 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), 
-			job_name=CONFIG.experiment_name + "_" + fold, 
+			job_name=job_name, 
 			project_dir=path.join(CONFIG.project_path, fold), 
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 )
 		)
 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py")))
-		all_jobnames.append(CONFIG.experiment_name + "_" + fold)
+		all_jobnames.append(job_name)
 		i+=1
 
 	hold_jid = ",".join(all_jobnames)
@@ -231,7 +233,7 @@ collect_results("{config_path}")
 
 def collect_results(CONFIG):
 
-	if isinstance(CONFIG, str): CONFIG = MLConfig(CONFIG);
+	if not isinstance(CONFIG, MLConfig): CONFIG = MLConfig(CONFIG);
 
 	_collect_importances(CONFIG)
 	_collect_results(CONFIG)
