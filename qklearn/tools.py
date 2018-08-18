@@ -204,10 +204,12 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 		
 		job_name=CONFIG.experiment_name + "_" + fold
 
-		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(
+		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(
 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py"), 
 			job_name=job_name, 
-			project_dir=path.join(CONFIG.project_path, fold), 
+			project_dir=path.join(CONFIG.project_path, fold),
+			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
+			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 )
 		)
 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT.py")))
@@ -219,7 +221,8 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 	COLLECT_TEMPLATE = """#!{shebang}
 from qklearn import collect_results
 collect_results("{config_path}")
-""".format(shebang=executable, config_path=path.join(CONFIG.project_path, "CONFIG"))
+""".format(shebang=executable, 
+	config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)))
 
 	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT.py"), "w") as js:
 			js.write(COLLECT_TEMPLATE)
