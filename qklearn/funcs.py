@@ -67,16 +67,12 @@ def _initialize_experiment(CONFIG):
     
     experiment_config_path = path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name))
 
-    if not CONFIG.config_path:
+    with open(experiment_config_path, "w") as f:
 
-        with open(experiment_config_path, "w") as f:
+        attr = [a for a in dir(CONFIG) if not a.startswith('__') and not callable(getattr(CONFIG,a)) and not a.startswith("_")]
 
-            attr = [a for a in dir(CONFIG) if not a.startswith('__') and not callable(getattr(CONFIG,a)) and not a.startswith("_")]
+        f.write(linesep.join(["{param}\t{value}".format(param=param, value=getattr(CONFIG, param)) for param in attr]))
 
-            f.write(linesep.join(["{param}\t{value}".format(param=param, value=getattr(CONFIG, param)) for param in attr]))
-
-    else:
-        copyfile(CONFIG.config_path, experiment_config_path)
 
 def _do_fold(train, test, i, K, X, Y, project_path):
     
