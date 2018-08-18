@@ -238,7 +238,7 @@ def collect_results(CONFIG):
 
 def apply_estimator_to_fold(CONFIG, fold):
 
-	if isinstance(CONFIG, str): CONFIG = MLConfig(CONFIG);
+	if not isinstance(CONFIG, MLConfig): CONFIG = MLConfig(CONFIG);
 
 	import pandas as pd
 	from os import path, sep
