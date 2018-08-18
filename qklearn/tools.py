@@ -49,7 +49,7 @@ class MLConfig:
 		KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 
 
-	def __init__(self, config_path):
+	def __init__(self, *args, **kwargs):
 
 		from os import path, sep
 
@@ -62,35 +62,48 @@ class MLConfig:
 			s = s.replace(' ', '\t')
 			while "\t\t" in s: s = s.replace("\t\t", "\t");
 			return s
-		with open(config_path, "r") as config_file:
 
-			config_file_contents = _newline_cleanup(config_file.read())
+		if len(args)== 1:
+			with open(config_path, "r") as config_file:
 
-			for line in config_file_contents.split('\n'):
-				line = line.strip()
-				if line.startswith("#") or line.startswith("//"): continue;
-				line = _whitespace_cleanup(line)
-				fields = line.split('\t')
-				if len(fields) != 2:
+				config_file_contents = _newline_cleanup(config_file.read())
 
-					fields = [fields[0], " ".join(fields[1:])]
-					
+				for line in config_file_contents.split('\n'):
+					line = line.strip()
+					if line.startswith("#") or line.startswith("//"): continue;
+					line = _whitespace_cleanup(line)
+					fields = line.split('\t')
+					if len(fields) != 2:
 
-				fields[0] = fields[0].lower()
-				if fields[0] not in ["experiment_path"]:
-					self._config_dict[fields[0]] = fields[1]
+						fields = [fields[0], " ".join(fields[1:])]
+						
+
+					fields[0] = fields[0].lower()
+					if fields[0] not in ["experiment_path"]:
+						self._config_dict[fields[0]] = fields[1]
 
 
-		if self.data_file == None:
-			raise ValueError("Incorrect configuration! data_file must be set!")
-		elif self.project_path == None:
-			raise ValueError("Incorrect configuration! project_path must be set!")
-		elif self.experiment_name == None:
-			raise ValueError("Incorrect configuration! experiment_name must be set!")
+			if self.data_file == None:
+				raise ValueError("Incorrect configuration! data_file must be set!")
+			elif self.project_path == None:
+				raise ValueError("Incorrect configuration! project_path must be set!")
+			elif self.experiment_name == None:
+				raise ValueError("Incorrect configuration! experiment_name must be set!")
 
-		self._config_dict['config_path'] = config_path
-		self._config_dict['experiment_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
-		
+			self._config_dict['config_path'] = config_path
+			self._config_dict['experiment_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
+
+		elif "data_file" in kwargs and "project_path" in kwargs and "experiment_name" in kwargs:
+
+			for param, value in kwargs:
+
+				self._config_dict[param] = value
+
+			self._config_dict['experiment_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
+			self._config_dict['config_path'] = False
+		else:
+
+			raise ValueError("Incorrect Config initialization. Please refer to the documentation.")
 
 def create_kfold_cv(CONFIG):
 	

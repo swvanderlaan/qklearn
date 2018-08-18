@@ -60,11 +60,23 @@ def _collect_importances(CONFIG):
     plt.savefig(path.join(CONFIG.experiment_path, "SummarizedFeatureImportancePlot.png"))
 
 def _initialize_experiment(CONFIG):
-    from os import path, system
+    from os import path, system, linesep
     from shutil import copyfile
 
     if not path.isdir(CONFIG.experiment_path): system("mkdir {experiment_path}".format(experiment_path=CONFIG.experiment_path));
-    copyfile(CONFIG.config_path, path.join(CONFIG.experiment_path, "CONFIG"))
+    
+    experiment_config_path = path.join(CONFIG.experiment_path, "CONFIG")
+    
+    if not CONFIG.config_path:
+
+        with open(experiment_config_path, "w") as f:
+
+            attr = [a for a in dir(CONFIG) if not a.startswith('__') and not callable(getattr(CONFIG,a)) and not a.startswith("_")]
+
+            f.write(linesep.join(["{param}\t{value}".format(param=param, value=getattr(CONFIG, param)) for param in attr]))
+
+    else:
+        copyfile(CONFIG.config_path, experiment_config_path)
 
 def _do_fold(train, test, i, K, X, Y, experiment_path):
     
