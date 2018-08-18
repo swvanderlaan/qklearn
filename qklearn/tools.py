@@ -45,8 +45,8 @@ class MLConfig:
 	def __str__(self):
 
 		return """PROJECT_PATH={0}
-		DATA_FILE={1}
-		KCV={2}""".format(self.project_path, self.data_file, self.KCV)
+DATA_FILE={1}
+KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 
 
 	def __init__(self, *args, **kwargs):
