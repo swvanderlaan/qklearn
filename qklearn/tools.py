@@ -224,12 +224,12 @@ collect_results("{config_path}")
 """.format(shebang=executable, 
 	config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)))
 
-	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT.py"), "w") as js:
+	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
 			js.write(COLLECT_TEMPLATE)
 
 	system("echo \"python {collect_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
 		hold_jid=hold_jid, 
-		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT.py"), 
+		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 		job_name=CONFIG.experiment_name + "_COLLECTOR", 
 		project_dir=CONFIG.project_path)
 	)

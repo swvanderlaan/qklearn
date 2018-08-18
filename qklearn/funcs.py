@@ -18,7 +18,7 @@ def _collect_results(CONFIG):
     plt.xlabel("Error")
     plt.ylabel("MSE")
     plt.title("Mean Feature Importances for {experiment} over all folds (k={folds})".format(experiment=CONFIG.experiment_name, folds=CONFIG.KCV))
-    plt.savefig(path.join(CONFIG.project_path, "SummarizedErrorPlot.png"))
+    plt.savefig(path.join(CONFIG.project_path, "SummarizedErrorPlot_{experiment_name}.png".format(experiment_name=CONFIG.experiment_name)))
 
 def _collect_importances(CONFIG):
     import pandas as pd
@@ -57,7 +57,7 @@ def _collect_importances(CONFIG):
     plt.xticks(range(0,len(bar_data)), bar_data['feature'], rotation='vertical')
     plt.title("Summarized Feature Importance for {experiment} over all folds (k={folds})".format(experiment=CONFIG.experiment_name, folds=CONFIG.KCV))
     plt.tight_layout()
-    plt.savefig(path.join(CONFIG.project_path, "SummarizedFeatureImportancePlot.png"))
+    plt.savefig(path.join(CONFIG.project_path, "SummarizedFeatureImportancePlot_{experiment_name}.png".format(experiment_name=CONFIG.experiment_name)))
 
 def _initialize_experiment(CONFIG):
     from os import path, system, linesep
