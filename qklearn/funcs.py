@@ -69,7 +69,7 @@ def _initialize_experiment(CONFIG):
 
     with open(experiment_config_path, "w") as f:
 
-        attr = [a for a in dir(CONFIG) if not a.startswith('__') and not callable(getattr(CONFIG,a)) and not a.startswith("_")]
+        attr = [a for a in dir(CONFIG) if not a.startswith('__') and not callable(getattr(CONFIG,a)) and not a.startswith("_") and a != "config_path"]
 
         f.write(linesep.join(["{param}\t{value}".format(param=param, value=getattr(CONFIG, param)) for param in attr]))
 
