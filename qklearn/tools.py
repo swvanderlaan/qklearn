@@ -122,7 +122,7 @@ KCV={2}""".format(self.project_path, self.data_file, self.KCV)
 			elif self.experiment_name == None:
 				raise ValueError("Incorrect configuration! experiment_name must be set!")
 
-			self._config_dict['config_path'] = config_path
+			self._config_dict['config_path'] = args[0]
 			self._config_dict['experiment_path'] = path.join(self.project_path, self.experiment_name).replace('\\', sep).replace('/', sep)
 
 		elif "data_file" in kwargs and "project_path" in kwargs and "experiment_name" in kwargs:
