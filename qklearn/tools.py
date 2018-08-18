@@ -314,7 +314,8 @@ def apply_estimator_to_fold(CONFIG, fold):
 
 
 	#Save the results for this experiment in table format for easy processing later
-	d = {"fold" : [fold], 
+	d = {"experiment_name" : [CONFIG.experiment_name],
+		"fold" : [fold],
 		"train_error" : [train_error],
 		"validation_error" : [validation_error]
 	}
