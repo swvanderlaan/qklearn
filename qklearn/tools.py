@@ -297,6 +297,7 @@ def apply_estimator_to_fold(CONFIG, fold):
 	#And make the predictions:
 	validation_error = metric(VALIDATION_OUTPUT, ESTIMATOR.predict(VALIDATION_INPUT))
 
+	oob_score = False
 	#Extract feature importances if they are present, and account for the possibility of a Pipeline object (which will have a "steps" attribute)
 	if isinstance(ESTIMATOR, Pipeline) and hasattr(ESTIMATOR, "steps"):
 
@@ -305,13 +306,18 @@ def apply_estimator_to_fold(CONFIG, fold):
 			if hasattr(step, 'feature_importances_'):
 
 				_extract_feature_importances(CONFIG,fold,step, VALIDATION_INPUT.columns.values)
-				break
+			
+			if hasattr(step, 'oob_score_'):
+				oob_score = step.oob_score_
 	else:
 
 		if hasattr(step, 'feature_importances_'):
 
 			_extract_feature_importances(CONFIG,fold,ESTIMATOR, VALIDATION_INPUT.columns.values)
 
+		if hasattr(step, 'oob_score_'):
+
+				oob_score = step.oob_score_
 
 	#Save the results for this experiment in table format for easy processing later
 	d = {"experiment_name" : [CONFIG.experiment_name],
@@ -319,6 +325,8 @@ def apply_estimator_to_fold(CONFIG, fold):
 		"train_error" : [train_error],
 		"validation_error" : [validation_error]
 	}
+
+	if oob_score != False: d['oob_error'] = [1.0-oob_score];
 
 	pd.DataFrame.from_dict(d).to_csv(path.join(CONFIG.project_path, fold, "ML_RESULT_{experiment_name}_{fold}.csv".format(experiment_name=CONFIG.experiment_name,fold=fold.replace(sep, ''))), index=False)
 
