@@ -33,6 +33,14 @@ class MLConfig:
 		self._config_dict['qsub_mail'] = qsub_mail
 
 	@property
+	def qsub_mem(self):
+		return self._config_dict['qsub_mem'] if 'qsub_mem' in self._config_dict else "20G"
+
+	@qsub_mem.setter
+	def qsub_mem(self, qsub_mem):
+		self._config_dict['qsub_mem'] = qsub_mem
+
+	@property
 	def data_file(self):
 		return self._config_dict['data_file']
 
@@ -212,14 +220,15 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 		
 		job_name=CONFIG.experiment_name + "_" + fold
 
-		system("echo \"python {job_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=01:00:00 -pe threaded {num_cores}".format(
+		system("echo \"python {job_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem={qsub_mem} -l h_rt=01:00:00 -pe threaded {num_cores}".format(
 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 			job_name=job_name, 
 			project_dir=path.join(CONFIG.project_path, fold),
 			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
 			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1, 
-			qsub_mail="-m a -M " + CONFIG.qsub_mail if qsub_mail != False else ""
+			qsub_mail="-m a -M " + CONFIG.qsub_mail if qsub_mail != False else "",
+			qsub_mem=CONFIG.qsub_mem
 			)
 		)
 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py")))
