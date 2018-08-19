@@ -204,7 +204,7 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 		
 		job_name=CONFIG.experiment_name + "_" + fold
 
-		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=00:30:00 -pe threaded {num_cores}".format(
+		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=01:00:00 -pe threaded {num_cores}".format(
 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 			job_name=job_name, 
 			project_dir=path.join(CONFIG.project_path, fold),
