@@ -204,7 +204,7 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 		
 		job_name=CONFIG.experiment_name + "_" + fold
 
-		system("echo \"python {job_script_path}\" | qsub -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=01:00:00 -pe threaded {num_cores}".format(
+		system("echo \"python {job_script_path}\" | qsub -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=01:00:00 -pe threaded {num_cores}".format(
 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 			job_name=job_name, 
 			project_dir=path.join(CONFIG.project_path, fold),
@@ -227,7 +227,7 @@ collect_results("{config_path}")
 	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
 			js.write(COLLECT_TEMPLATE)
 
-	system("echo \"python {collect_script_path}\" | qsub -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
+	system("echo \"python {collect_script_path}\" | qsub -cwd -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
 		hold_jid=hold_jid, 
 		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 		job_name=CONFIG.experiment_name + "_COLLECTOR", 
