@@ -227,7 +227,7 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
 			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1, 
-			qsub_mail="" if not CONFIG.qsub_mail else "-m a -M " if CONFIG.qsub_mail,
+			qsub_mail="" if not CONFIG.qsub_mail else "-m a -M " + CONFIG.qsub_mail,
 			qsub_mem=CONFIG.qsub_mem
 			)
 		)
