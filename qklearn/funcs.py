@@ -14,7 +14,7 @@ def _collect_results(CONFIG):
     ax = fig.add_subplot(111)
 
     ax.boxplot([results['oob_error'] if 'oob_error' in results.columns.values else results['train_error'], results['validation_error']])
-    plt.xticks([1,2], ['train', 'validation'])
+    plt.xticks([1,2], ['OOB' if 'oob_error' in results.columns.values else 'train', 'validation'])
     plt.xlabel("Error")
     plt.ylabel("MSE")
     plt.title("Errors for {experiment} over all folds (k={folds})".format(experiment=CONFIG.experiment_name, folds=CONFIG.KCV))
