@@ -251,7 +251,7 @@ collect_results("{config_path}")
 		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 		job_name=CONFIG.experiment_name + "_COLLECTOR", 
 		project_dir=CONFIG.project_path), 
-		qsub_mail="-m a -M " + CONFIG.qsub_mail if qsub_mail != False else ""
+		qsub_mail="-m a -M " + CONFIG.qsub_mail if CONFIG.qsub_mail != False else ""
 	)
 
 def collect_results(CONFIG):
