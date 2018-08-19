@@ -227,7 +227,7 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
 			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1, 
-			qsub_mail="-m a -M " + CONFIG.qsub_mail if CONFIG.qsub_mail != False else "",
+			qsub_mail="" if not CONFIG.qsub_mail else "-m a -M " if CONFIG.qsub_mail,
 			qsub_mem=CONFIG.qsub_mem
 			)
 		)
@@ -250,8 +250,8 @@ collect_results("{config_path}")
 		hold_jid=hold_jid, 
 		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 		job_name=CONFIG.experiment_name + "_COLLECTOR", 
-		project_dir=CONFIG.project_path), 
-		qsub_mail="-m a -M " + CONFIG.qsub_mail if CONFIG.qsub_mail != False else ""
+		project_dir=CONFIG.project_path),
+		qsub_mail= "" if not CONFIG.qsub_mail else "-m a -M " + CONFIG.qsub_mail
 	)
 
 def collect_results(CONFIG):
