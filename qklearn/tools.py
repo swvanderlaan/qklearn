@@ -25,6 +25,14 @@ class MLConfig:
 		self._config_dict['project_path'] = project_path
 
 	@property
+	def qsub_mail(self):
+		return self._config_dict['qsub_mail'] if 'qsub_mail' in self._config_dict else False
+
+	@qsub_mail.setter
+	def qsub_mail(self, qsub_mail):
+		self._config_dict['qsub_mail'] = qsub_mail
+
+	@property
 	def data_file(self):
 		return self._config_dict['data_file']
 
@@ -204,13 +212,15 @@ apply_estimator_to_fold("{config_path}", "{fold}")
 		
 		job_name=CONFIG.experiment_name + "_" + fold
 
-		system("echo \"python {job_script_path}\" | qsub -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=01:00:00 -pe threaded {num_cores}".format(
+		system("echo \"python {job_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem=20G -l h_rt=01:00:00 -pe threaded {num_cores}".format(
 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 			job_name=job_name, 
 			project_dir=path.join(CONFIG.project_path, fold),
 			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
 			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
-			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1 )
+			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1, 
+			qsub_mail="-m a -M " + CONFIG.qsub_mail if qsub_mail != False else ""
+			)
 		)
 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py")))
 		all_jobnames.append(job_name)
@@ -227,11 +237,12 @@ collect_results("{config_path}")
 	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
 			js.write(COLLECT_TEMPLATE)
 
-	system("echo \"python {collect_script_path}\" | qsub -cwd -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
+	system("echo \"python {collect_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
 		hold_jid=hold_jid, 
 		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
 		job_name=CONFIG.experiment_name + "_COLLECTOR", 
-		project_dir=CONFIG.project_path)
+		project_dir=CONFIG.project_path), 
+		qsub_mail="-m a -M " + CONFIG.qsub_mail if qsub_mail != False else ""
 	)
 
 def collect_results(CONFIG):
