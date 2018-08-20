@@ -250,7 +250,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 from qklearn import apply_estimator_to_fold
 from os import environ
 #The SGE_TASK_ID variable contains the identifier for the array job
-apply_estimator_to_fold("{config_path}", environ['SGE_TASK_ID'])
+apply_estimator_to_fold("{config_path}", "fold" + str(environ['SGE_TASK_ID']))
 """.format(shebang=executable,
 	job_name="KFOLD_{experiment_name}".format(experiment_name=CONFIG.experiment_name), 
 	config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)),
