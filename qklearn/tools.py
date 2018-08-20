@@ -266,7 +266,7 @@ apply_estimator_to_fold("{config_path}", environ('SGE_TASK_ID'))
 
 	system("qsub -t {array_job_setting} {job_script_path}".format(
 				job_script_path=path.join(CONFIG.project_path, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)),
-				array_job_setting="1-{0}:1".format(CONFIG.KCV)
+				array_job_setting="1-{KCV}:1".format(KCV=CONFIG.KCV)
 				)
 			)
 
