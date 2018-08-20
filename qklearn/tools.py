@@ -287,7 +287,7 @@ collect_results("{config_path}")
 	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
 	qsub_mail_setting="" if not CONFIG.qsub_mail else "-m a",
 	job_name=CONFIG.experiment_name + "_COLLECTOR",
-	hold_jid="KFOLD_{experiment_name}".format(CONFIG.experiment_name),
+	hold_jid="KFOLD_{experiment_name}".format(experiment_name=CONFIG.experiment_name),
 	experiment_path=path.join(CONFIG.project_path, CONFIG.experiment_name)
 	)
 
