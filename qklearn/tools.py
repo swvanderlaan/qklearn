@@ -253,6 +253,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 
 		   HAS_NJOBS_ATTRIBUTE = True
 
+
 	if HAS_NJOBS_ATTRIBUTE:
 
 		NSLOTS = CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1
@@ -353,7 +354,7 @@ def apply_estimator_to_fold(CONFIG, fold):
 
 		metric = load(path.join(CONFIG.project_path, fold, "METRIC_{0}.pkl".format(CONFIG.experiment_name)))
 
-	n_jobs = environ['NSLOTS']
+	n_jobs = int(environ['NSLOTS'])
 
 	# Configure the estimator, or each of the steps in the Pipeline to utilize all cores, when the algorithm allows for it:
 	if isinstance(ESTIMATOR, Pipeline) and hasattr(ESTIMATOR, "steps"):
