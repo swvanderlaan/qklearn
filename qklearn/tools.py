@@ -252,7 +252,7 @@ from os import environ
 #The SGE_TASK_ID variable contains the identifier for the array job
 apply_estimator_to_fold("{config_path}", environ('SGE_TASK_ID'))
 """.format(shebang=executable,
-	job_name="KFOLD_{experiment_name}".format(CONFIG.experiment_name), 
+	job_name="KFOLD_{experiment_name}".format(experiment_name=CONFIG.experiment_name), 
 	config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)),
 	qsub_mem=CONFIG.qsub_mem,
 	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
