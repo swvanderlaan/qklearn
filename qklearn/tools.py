@@ -204,55 +204,97 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 	i=0
 	print("\t* Setting up and Submitting jobs:")
 
-	all_jobnames = []
+# 	all_jobnames = []
 
-	for fold in ["fold{0}".format(f) for f in range(0, CONFIG.KCV)]:
+# 	for fold in ["fold{0}".format(f) for f in range(0, CONFIG.KCV)]:
 
-		print("\t\t* {fold}".format(fold=fold))
+# 		print("\t\t* {fold}".format(fold=fold))
 
-		JOB_TEMPLATE = """#!{shebang}
-from qklearn import apply_estimator_to_fold
-apply_estimator_to_fold("{config_path}", "{fold}")
-		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)))
+# 		JOB_TEMPLATE = """#!{shebang}
+# from qklearn import apply_estimator_to_fold
+# apply_estimator_to_fold("{config_path}", "{fold}")
+# 		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)))
 
-		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
-			js.write(JOB_TEMPLATE)
+# 		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
+# 			js.write(JOB_TEMPLATE)
 		
-		job_name=CONFIG.experiment_name + "_" + fold
+# 		job_name=CONFIG.experiment_name + "_" + fold
 
-		system("echo \"python {job_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem={qsub_mem} -l h_rt=01:00:00 -pe threaded {num_cores}".format(
-			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
-			job_name=job_name, 
-			project_dir=path.join(CONFIG.project_path, fold),
-			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
-			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
-			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1, 
-			qsub_mail="" if not CONFIG.qsub_mail else "-m a -M " + CONFIG.qsub_mail,
-			qsub_mem=CONFIG.qsub_mem
+# 		system("echo \"python {job_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem={qsub_mem} -l h_rt=01:00:00 -pe threaded {num_cores}".format(
+# 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
+# 			job_name=job_name, 
+# 			project_dir=path.join(CONFIG.project_path, fold),
+# 			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
+# 			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
+# 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1, 
+# 			qsub_mail="" if not CONFIG.qsub_mail else "-m a -M " + CONFIG.qsub_mail,
+# 			qsub_mem=CONFIG.qsub_mem
+# 			)
+# 		)
+# 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py")))
+# 		all_jobnames.append(job_name)
+# 		i+=1
+
+# 	hold_jid = ",".join(all_jobnames)
+
+	JOB_TEMPLATE = """#$ -S {shebang}
+#$ -cwd
+#$ -o {experiment_path}/logs
+#$ -e {experiment_path}/errors
+#$ -N {job_name}
+#$ -l h_vmem={qsub_mem}
+#$ -l h_rt=01:00:00
+#$ -pe threaded {num_cores}
+{qsub_mail_setting}
+{qsub_mail}
+from qklearn import apply_estimator_to_fold
+from os import environ
+#The SGE_TASK_ID variable contains the identifier for the array job
+apply_estimator_to_fold("{config_path}", environ('SGE_TASK_ID'))
+""".format(shebang=executable,
+	job_name="KFOLD_{experiment_name}".format(CONFIG.experiment_name), 
+	config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)),
+	qsub_mem=CONFIG.qsub_mem,
+	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
+	qsub_mail_setting="" if not CONFIG.qsub_mail else "-m a",
+	num_cores=num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1,
+	experiment_path=path.join(CONFIG.project_path, experiment_name)
+	)
+
+	with open(path.join(CONFIG.project_path, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
+		js.write(JOB_TEMPLATE)
+
+ 	system("qsub -t {array_job_setting} {job_script_path}".format(
+				job_script_path=path.join(CONFIG.project_path, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)),
+				array_job_setting="0-{0}:1".format(CONFIG.KCV-1)
+				)
 			)
-		)
-		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py")))
-		all_jobnames.append(job_name)
-		i+=1
 
-	hold_jid = ",".join(all_jobnames)
-
-	COLLECT_TEMPLATE = """#!{shebang}
+	COLLECT_TEMPLATE = """#$ -S {shebang}
+#$ -cwd
+#$ -l h_vmem=1G
+#$ -l h_rt=00:15:00
+#$ -hold_jid {hold_jid}
+#$ -N {job_name}
+#$ -o {experiment_path}/logs
+#$ -e {experiment_path}/errors
+{qsub_mail_setting}
+{qsub_mail}
 from qklearn import collect_results
 collect_results("{config_path}")
 """.format(shebang=executable, 
-	config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)))
+	config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)),
+	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
+	qsub_mail_setting="" if not CONFIG.qsub_mail else "-m a",
+	job_name=CONFIG.experiment_name + "_COLLECTOR",
+	hold_jid="KFOLD_{experiment_name}".format(CONFIG.experiment_name),
+	experiment_path=path.join(CONFIG.project_path, experiment_name)
+	)
 
 	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
 			js.write(COLLECT_TEMPLATE)
 
-	system("echo \"python {collect_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {project_dir} -e {project_dir} -hold_jid {hold_jid} -l h_vmem=1G -l h_rt=00:15:00".format(
-		hold_jid=hold_jid, 
-		collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
-		job_name=CONFIG.experiment_name + "_COLLECTOR", 
-		project_dir=CONFIG.project_path),
-		qsub_mail= "" if not CONFIG.qsub_mail else "-m a -M " + CONFIG.qsub_mail
-	)
+	system("qsub {collect_script_path}".format(collect_script_path=path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name))))
 
 def collect_results(CONFIG):
 
