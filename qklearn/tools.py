@@ -164,7 +164,7 @@ def create_kfold_cv(CONFIG):
 	OUTPUT = df[CONFIG.target_variable]
 	print("\t* Creating folds")
 
-	_ = Parallel(n_jobs=-1,max_nbytes=None)( delayed(_do_fold)(train, test, i, CONFIG.KCV, INPUT, OUTPUT, CONFIG.project_path) for (train, test), i in zip(KFold(CONFIG.KCV).split(INPUT), range(0, CONFIG.KCV)) )
+	_ = Parallel(n_jobs=-1,max_nbytes=None)( delayed(_do_fold)(train, test, i, CONFIG.KCV, INPUT, OUTPUT, CONFIG.project_path) for (train, test), i in zip(KFold(CONFIG.KCV).split(INPUT), range(1, CONFIG.KCV+1)) )
 
 def execute_experiment_kfold(CONFIG, estimator, metric=False):
 
