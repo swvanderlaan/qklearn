@@ -237,6 +237,28 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 
 # 	hold_jid = ",".join(all_jobnames)
 
+	HAS_NJOBS_ATTRIBUTE = False
+
+	if isinstance(estimator, Pipeline) and hasattr(estimator, "steps"):
+
+		for i, (name, step) in enumerate(estimator.steps):
+
+		   if hasattr(step, "n_jobs"):
+
+			   HAS_NJOBS_ATTRIBUTE = True
+
+	else:
+
+		if hasattr(estimator, "n_jobs"):
+
+		   HAS_NJOBS_ATTRIBUTE = True
+
+	if HAS_NJOBS_ATTRIBUTE:
+
+		NSLOTS = CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1
+	else:
+		NSLOTS = 1
+
 	JOB_TEMPLATE = """#$ -S {shebang}
 #$ -cwd
 #$ -o {experiment_path}/logs
@@ -257,7 +279,7 @@ apply_estimator_to_fold("{config_path}", "fold" + str(environ['SGE_TASK_ID']))
 	qsub_mem=CONFIG.qsub_mem,
 	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
 	qsub_mail_setting="" if not CONFIG.qsub_mail else "#$ -m a",
-	num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1,
+	num_cores=NSLOTS,
 	experiment_path=path.join(CONFIG.project_path, CONFIG.experiment_name)
 	)
 
@@ -308,7 +330,7 @@ def apply_estimator_to_fold(CONFIG, fold):
 	if not isinstance(CONFIG, MLConfig): CONFIG = MLConfig(CONFIG);
 
 	import pandas as pd
-	from os import path, sep
+	from os import path, sep, environ
 	from sklearn.pipeline import Pipeline
 	from sklearn.metrics import mean_squared_error, accuracy_score
 	from glob import glob
@@ -331,6 +353,8 @@ def apply_estimator_to_fold(CONFIG, fold):
 
 		metric = load(path.join(CONFIG.project_path, fold, "METRIC_{0}.pkl".format(CONFIG.experiment_name)))
 
+	n_jobs = environ['NSLOTS']
+
 	# Configure the estimator, or each of the steps in the Pipeline to utilize all cores, when the algorithm allows for it:
 	if isinstance(ESTIMATOR, Pipeline) and hasattr(ESTIMATOR, "steps"):
 
@@ -338,13 +362,13 @@ def apply_estimator_to_fold(CONFIG, fold):
 
 		   if hasattr(step, "n_jobs"):
 
-			   ESTIMATOR.steps[i][1].n_jobs = -1
+			   ESTIMATOR.steps[i][1].n_jobs = n_jobs
 
 	else:
 
 		if hasattr(ESTIMATOR, "n_jobs"):
 
-		   ESTIMATOR.n_jobs = -1
+		   ESTIMATOR.n_jobs = n_jobs
 
 	#Fit the estimator/pipeline to the dats
 	ESTIMATOR.fit(TRAIN_INPUT, TRAIN_OUTPUT)
