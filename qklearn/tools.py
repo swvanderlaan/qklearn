@@ -257,7 +257,7 @@ apply_estimator_to_fold("{config_path}", environ('SGE_TASK_ID'))
 	qsub_mem=CONFIG.qsub_mem,
 	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
 	qsub_mail_setting="" if not CONFIG.qsub_mail else "-m a",
-	num_cores=num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1,
+	num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1,
 	experiment_path=path.join(CONFIG.project_path, experiment_name)
 	)
 
