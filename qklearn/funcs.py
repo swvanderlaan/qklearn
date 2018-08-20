@@ -64,7 +64,10 @@ def _initialize_experiment(CONFIG):
     from shutil import copyfile
 
     if not path.isdir(CONFIG.project_path): system("mkdir {project_path}".format(project_path=CONFIG.project_path));
-    
+    if not path.isdir(path.join(CONFIG.project_path, CONFIG.experiment_name)): system("mkdir {project_path}".format(project_path=path.join(CONFIG.project_path, CONFIG.experiment_name)));
+    if not path.isdir(path.join(CONFIG.project_path, CONFIG.experiment_name, "errors")): system("mkdir {project_path}".format(project_path=path.join(CONFIG.project_path, CONFIG.experiment_name, "errors")));
+    if not path.isdir(path.join(CONFIG.project_path, CONFIG.experiment_name, "logs")): system("mkdir {project_path}".format(project_path=path.join(CONFIG.project_path, CONFIG.experiment_name, "logs")));
+
     experiment_config_path = path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name))
 
     with open(experiment_config_path, "w") as f:
