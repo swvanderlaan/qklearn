@@ -258,7 +258,7 @@ apply_estimator_to_fold("{config_path}", environ('SGE_TASK_ID'))
 	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
 	qsub_mail_setting="" if not CONFIG.qsub_mail else "-m a",
 	num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1,
-	experiment_path=path.join(CONFIG.project_path, experiment_name)
+	experiment_path=path.join(CONFIG.project_path, CONFIG.experiment_name)
 	)
 
 	with open(path.join(CONFIG.project_path, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
@@ -288,7 +288,7 @@ collect_results("{config_path}")
 	qsub_mail_setting="" if not CONFIG.qsub_mail else "-m a",
 	job_name=CONFIG.experiment_name + "_COLLECTOR",
 	hold_jid="KFOLD_{experiment_name}".format(CONFIG.experiment_name),
-	experiment_path=path.join(CONFIG.project_path, experiment_name)
+	experiment_path=path.join(CONFIG.project_path, CONFIG.experiment_name)
 	)
 
 	with open(path.join(CONFIG.project_path, "COLLECT_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
