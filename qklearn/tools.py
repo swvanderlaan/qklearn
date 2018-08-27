@@ -41,6 +41,14 @@ class MLConfig:
 		self._config_dict['qsub_mem'] = qsub_mem
 
 	@property
+	def qsub_rt(self):
+		return self._config_dict['qsub_rt'] if 'qsub_rt' in self._config_dict else "00:30:00"
+
+	@qsub_rt.setter
+	def qsub_rt(self, qsub_rt):
+		self._config_dict['qsub_rt'] = qsub_rt
+
+	@property
 	def data_file(self):
 		return self._config_dict['data_file']
 
@@ -233,7 +241,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 #$ -e {experiment_path}/errors
 #$ -N {job_name}
 #$ -l h_vmem={qsub_mem}
-#$ -l h_rt=01:00:00
+#$ -l h_rt={qsub_rt}
 #$ -pe threaded {num_cores}
 {qsub_mail_setting}
 {qsub_mail}
@@ -249,7 +257,8 @@ apply_estimator_to_fold("{config_path}", "fold" + str(environ['SGE_TASK_ID']))
 	qsub_mail="" if not CONFIG.qsub_mail else "#$ -M " + CONFIG.qsub_mail,
 	qsub_mail_setting="" if not CONFIG.qsub_mail else "#$ -m a",
 	num_cores=NSLOTS,
-	experiment_path=path.join(CONFIG.project_path, CONFIG.experiment_name)
+	experiment_path=path.join(CONFIG.project_path, CONFIG.experiment_name),
+	qsub_rt=CONFIG.qsub_rt
 	)
 
 	with open(path.join(CONFIG.project_path, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
