@@ -204,39 +204,6 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 	i=0
 	print("\t* Setting up and Submitting jobs:")
 
-# 	all_jobnames = []
-
-# 	for fold in ["fold{0}".format(f) for f in range(0, CONFIG.KCV)]:
-
-# 		print("\t\t* {fold}".format(fold=fold))
-
-# 		JOB_TEMPLATE = """#!{shebang}
-# from qklearn import apply_estimator_to_fold
-# apply_estimator_to_fold("{config_path}", "{fold}")
-# 		""".format(shebang=executable, fold=fold, config_path=path.join(CONFIG.project_path, "CONFIG_{experiment_name}".format(experiment_name=CONFIG.experiment_name)))
-
-# 		with open(path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), "w") as js:
-# 			js.write(JOB_TEMPLATE)
-		
-# 		job_name=CONFIG.experiment_name + "_" + fold
-
-# 		system("echo \"python {job_script_path}\" | qsub {qsub_mail} -cwd -N {job_name} -o {log_file} -e {error_file} -l h_vmem={qsub_mem} -l h_rt=01:00:00 -pe threaded {num_cores}".format(
-# 			job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py".format(experiment_name=CONFIG.experiment_name)), 
-# 			job_name=job_name, 
-# 			project_dir=path.join(CONFIG.project_path, fold),
-# 			log_file=path.join(CONFIG.project_path, fold, job_name + ".log"),
-# 			error_file=path.join(CONFIG.project_path, fold, job_name + ".errors"),
-# 			num_cores=CONFIG.n_jobs if CONFIG.n_jobs != -1 else 1, 
-# 			qsub_mail="" if not CONFIG.qsub_mail else "-m a -M " + CONFIG.qsub_mail,
-# 			qsub_mem=CONFIG.qsub_mem
-# 			)
-# 		)
-# 		#system("python {job_script_path}".format(job_script_path=path.join(CONFIG.project_path, fold, "JOB_SCRIPT_{experiment_name}.py")))
-# 		all_jobnames.append(job_name)
-# 		i+=1
-
-# 	hold_jid = ",".join(all_jobnames)
-
 	HAS_NJOBS_ATTRIBUTE = False
 
 	if isinstance(estimator, Pipeline) and hasattr(estimator, "steps"):
@@ -272,6 +239,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 {qsub_mail}
 from qklearn import apply_estimator_to_fold
 from os import environ
+environ['OMP_NUM_THREADS'] = 1
 #The SGE_TASK_ID variable contains the identifier for the array job
 apply_estimator_to_fold("{config_path}", "fold" + str(environ['SGE_TASK_ID']))
 """.format(shebang=executable,
