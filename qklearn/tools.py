@@ -247,7 +247,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 {qsub_mail}
 from qklearn import apply_estimator_to_fold
 from os import environ
-environ['OMP_NUM_THREADS'] = 1
+environ['OMP_NUM_THREADS'] = "1"
 #The SGE_TASK_ID variable contains the identifier for the array job
 apply_estimator_to_fold("{config_path}", "fold" + str(environ['SGE_TASK_ID']))
 """.format(shebang=executable,
