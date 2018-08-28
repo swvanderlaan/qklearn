@@ -81,6 +81,8 @@ for n_estimators in [10, 25, 50, 100, 250, 500]:
 
 ```
 
+## Results and Reporting
+
 Training and Validation results are reported per fold, in each fold's folder, named `ML_RESULTS_[EXPERIMENT_NAME].csv`, so as to be collected and combined later on.
 An example CSV result file:
 ```csv
@@ -89,3 +91,5 @@ fold0,0.035114868377720494,0.0351148683777205
 ```
 
 Where possible, `qklearn` will extract and plot feature importances from the estimator. It will also attempt to automatically extract these from a `Pipeline` object.
+
+Error and log files are stored in a subdirectory of the project directory, one or each experiment.
