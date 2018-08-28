@@ -13,6 +13,7 @@ pip install git+git://github.com/tbezemer/qklearn
 ```
 
 ## Usage
+### Experiment Configuration
 `qklearn` uses a configuration file to perform experiments. The file contains some basic parameters needed for the experiment.
 It is essentially a tab/space separated file with a `parameter` name on the left (case insensitive) and a `value` on the right.
 Spaces or tabs after the first space (separating the two main fields) will not be considered field separators (e.g. spaces in `value` are allowed)
@@ -35,6 +36,7 @@ target_variable	my_output
 
 You can also use the `MLConfig` object in the toolkit to programmatically define each of the properties, or to lead a config file and edit specific properties:
 
+### Examples
 ```python
 from qklearn import MLConfig
 
