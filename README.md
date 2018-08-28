@@ -34,21 +34,9 @@ n_jobs	12
 target_variable	my_output
 ```
 
-You can also use the `MLConfig` object in the toolkit to programmatically define each of the properties, or to lead a config file and edit specific properties:
+You can also use the `MLConfig` object in the toolkit to programmatically define each of the properties, or to lead a config file and edit specific properties.
 
 ### Examples
-```python
-from qklearn import MLConfig
-
-C = MLConfig("path/to/my/config.txt")
-C.experiment_name = "I changed my mind"
-
-p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor(n_estimators=30))])
-
-execute_experiment_kfold(C, p)
-
-```
-
 You can run an experiment using a predefined config file (e.g. `config.txt`, following the rules described above) as follows:
 
 ```python
@@ -62,6 +50,20 @@ p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor
 
 execute_experiment_kfold("path/to/my/config.txt", p)
 ```
+
+or tweak the `MLConfig` object before you execute the experiment:
+
+```python
+from qklearn import MLConfig
+
+C = MLConfig("path/to/my/config.txt")
+C.experiment_name = "I changed my mind"
+
+p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor(n_estimators=30))])
+
+execute_experiment_kfold(C, p)
+
+``` 
 
 If you want to further automate for instance a process of parameter optimization, you can load a config file, and use a loop, editing the config file to set up a new experiment, while keeping the other properties of the configuration:
 
