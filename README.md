@@ -75,7 +75,7 @@ C = MLConfig("path/to/my/config.txt")
 for n_estimators in [10, 25, 50, 100, 250, 500]:
 
 	p = Pipeline([("Standard Scale", StandardScaler()), ("RF", RandomForestRegressor(n_estimators=n_estimators))])
-	C.experiment_name = "optimization_n={n}".format(ns=n_estimators)
+	C.experiment_name = "optimization_n={n}".format(n=n_estimators)
 	execute_experiment_kfold(C, p)
 
 
