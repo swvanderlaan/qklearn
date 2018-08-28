@@ -247,7 +247,7 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 {qsub_mail}
 from qklearn import apply_estimator_to_fold
 from os import environ
-environ['OMP_NUM_THREADS'] = "{num_cores}"
+environ['OMP_NUM_THREADS'] = "1"
 #The SGE_TASK_ID variable contains the identifier for the array job
 apply_estimator_to_fold("{config_path}", "fold" + str(environ['SGE_TASK_ID']))
 """.format(shebang=executable,
@@ -331,7 +331,9 @@ def apply_estimator_to_fold(CONFIG, fold):
 
 		metric = load(path.join(CONFIG.project_path, fold, "METRIC_{0}.pkl".format(CONFIG.experiment_name)))
 
-	n_jobs = int(environ['NSLOTS'])
+	n_jobs = -1
+
+	#n_jobs = int(environ['NSLOTS'])
 
 	# Configure the estimator, or each of the steps in the Pipeline to utilize all cores, when the algorithm allows for it:
 	if isinstance(ESTIMATOR, Pipeline) and hasattr(ESTIMATOR, "steps"):
