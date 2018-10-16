@@ -1,4 +1,5 @@
 def _collect_results(CONFIG):
+    from numpy import sqrt
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -13,10 +14,10 @@ def _collect_results(CONFIG):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    ax.boxplot([results['oob_error'] if 'oob_error' in results.columns.values else results['train_error'], results['validation_error']])
+    ax.boxplot([sqrt(results['oob_error']) if 'oob_error' in results.columns.values else sqrt(results['train_error']), results['validation_error']])
     plt.xticks([1,2], ['OOB' if 'oob_error' in results.columns.values else 'train', 'validation'])
     plt.xlabel("Error")
-    plt.ylabel("MSE")
+    plt.ylabel("RMSE")
     plt.title("Errors for {experiment} over all folds (k={folds})".format(experiment=CONFIG.experiment_name, folds=CONFIG.KCV))
     plt.savefig(path.join(CONFIG.project_path, "SummarizedErrorPlot_{experiment_name}.png".format(experiment_name=CONFIG.experiment_name)))
 
@@ -48,7 +49,7 @@ def _collect_importances(CONFIG):
             bar_data['std'].append(all_importances[col].std())
     bar_data = pd.DataFrame.from_dict(bar_data)
     bar_data = bar_data.sort_values("mean", ascending=False)
-    fig = plt.figure()
+    fig = plt.figure(figsize=(20,10))
     ax = fig.add_subplot(111)
     ax.bar(x=range(0,len(bar_data)),
             height=bar_data['mean'],
