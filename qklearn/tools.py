@@ -246,8 +246,11 @@ def execute_experiment_kfold(CONFIG, estimator, metric=False):
 {qsub_mail_setting}
 {qsub_mail}
 from qklearn import apply_estimator_to_fold
-from os import environ
+from os import environ, system
+#Set this parameter to prevent problems in the sklearn backend for parallelization
 environ['OMP_NUM_THREADS'] = "1"
+#Prevent saving core dumps on error, because they are useless
+system("ulimit -c 0")
 #The SGE_TASK_ID variable contains the identifier for the array job
 apply_estimator_to_fold("{config_path}", "fold" + str(environ['SGE_TASK_ID']))
 """.format(shebang=executable,
